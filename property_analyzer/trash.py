@@ -48,3 +48,24 @@ def main():
 
     # atAGlanceFacts = propertyDict['atAGlanceFacts']
     # atAGlanceFactsDict = {factDict['factLabel']: factDict['factValue'] for factDict in atAGlanceFacts}
+
+
+    # SELENIUM TESTING
+    
+    # print('\n' * 50)
+    # time.sleep(100)
+    # # Use Selenium to parse
+    # price = driver.find_element(By.CLASS_NAME, 'price')
+    # print(price)
+    # print(price.text)
+    # print(price.get_attribute('innerHTML'))
+
+    # header = utils.getRequestHeader()
+    # print(header)
+    # print('Fetching data from OneHome...')
+    # response = requests.get(url, headers=header)
+    # soup = BeautifulSoup(response.content, 'html.parser')
+    # print(response)
+    # print('CONTENT', response.content, response.text)
+    # print(soup.prettify())
+    # utils.handleResponseErrors(response, header)

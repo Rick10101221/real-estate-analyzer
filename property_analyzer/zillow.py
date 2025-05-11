@@ -1,5 +1,5 @@
 import requests
-import random
+import utils
 
 from bs4 import BeautifulSoup
 from html import unescape
@@ -7,20 +7,15 @@ from json import loads
 from re import compile
 
 
-OS = "Windows"
 REGEX_SPACE = compile(r"[\s ]+")
 
 
-def main():
-    url = input("Provide a Zillow.com URL: ")
-    if not url.startswith("https://www.zillow.com/homedetails/"):
-        print("Invalid URL. Please provide a valid Zillow.com home details URL.")
-        return
-    
-    header = getRequestHeader()
+def main(url):
+    header = utils.getRequestHeader()
     print(header)
+    print('Fetching data from Zillow...')
     response = requests.get(url, headers=header)
-    response.raise_for_status()
+    utils.handleResponseErrors(response, header)
     body = parseBody(response.content)
     propertyDict = getPropertyDataFromBody(body)
     addDataToPropertyDict(propertyDict, url)
@@ -39,47 +34,6 @@ def addDataToPropertyDict(propertyDict: dict[str, any], url) -> None:
     propertyDict['fullAddress'] = fullAddress
     propertyDict['url'] = url
     return
-
-
-def getOSCompatibleUserAgents() -> list[str]:
-    """
-    Get a list of user agents compatible with the current OS
-    :return: list of user agents
-    """
-    compatibleAgents = []
-    with open('user_agents.txt') as f:
-        for line in f:
-            if OS in line:
-                compatibleAgents.append(line.strip()) 
-
-    return compatibleAgents
-
-
-def getRequestHeader() -> dict[str, str]:
-    compatibleAgents = getOSCompatibleUserAgents()
-
-    if not compatibleAgents:
-        raise ValueError("No compatible user agents found for the current OS.")
-    
-    headers = {
-        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
-        'Accept-Language': 'en-US,en;q=0.5',
-        'Accept-Encoding': 'gzip, deflate, br',
-        "Cache-Control": "no-cache",
-        'Connection': 'keep-alive',
-        "Pragma": "no-cache",
-        "Sec-Ch-Ua-Mobile": "?0",
-        "Sec-Ch-Ua-Platform": '"Windows"',
-        "Sec-Fetch-Dest": "document",
-        "Sec-Fetch-Mode": "navigate",
-        "Sec-Fetch-Site": "none",
-        "Sec-Fetch-User": "?1",
-        "Upgrade-Insecure-Requests": "1",
-        'User-Agent': random.choice(compatibleAgents),
-        'TE': 'Trailers'
-    }
-
-    return headers
 
 
 def getPropertyDataFromBody(body: dict[str, any]) -> dict[str, any]:
