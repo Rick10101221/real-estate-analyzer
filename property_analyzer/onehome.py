@@ -37,15 +37,24 @@ def main(url):
     
     propertyDict = {}
     propertyDict['url'] = url
-    propertyDict['price'] = soup.find('p', class_='price').text.replace('$', '').replace(',', '')
-    propertyDict['fullAddress'] = soup.findAll('p', {'data-qa' : 'address-line1'})[0].text
-    propertyDict['location'] = propertyDict['fullAddress'].split(',')[0]
-    propertyDict['homeType'] = soup.select_one('li[data-qa=\'PropertySubTypeColon-feature\'] dd.detail').text
-    propertyDict['yearBuilt'] = soup.select_one('li[data-qa=\'YearBuiltColon-feature\'] dd.detail').text
-    propertyDict['livingArea'] = soup.findAll('span', {'data-qa' : 'sqft'})[0].text.replace('sqft', '').replace(',', '')
+    propertyDict['price'] = int(soup.find('p', class_='price').text.replace('$', '').replace(',','').strip())
+    propertyDict['fullAddress'] = soup.findAll('p', {'data-qa' : 'address-line1'})[0].text.strip()
+
+    addressSplit = propertyDict['fullAddress'].split(',')
+    if len(addressSplit) == 3:
+        propertyDict['streetAddress'] = propertyDict['fullAddress'].split(',')[0].strip()
+        propertyDict['location'] = propertyDict['fullAddress'].split(',')[1].strip()
+    elif len(addressSplit) == 2:
+        spaceIdx = addressSplit[0].rfind(' ')
+        propertyDict['streetAddress'] = addressSplit[0][:spaceIdx].strip()
+        propertyDict['location'] = addressSplit[0][spaceIdx+1:].strip() + ', ' + addressSplit[1].strip()
+
+    propertyDict['homeType'] = soup.select_one('li[data-qa=\'PropertySubTypeColon-feature\'] dd.detail').text.strip()
+    propertyDict['yearBuilt'] = int(soup.select_one('li[data-qa=\'YearBuiltColon-feature\'] dd.detail').text)
+    propertyDict['livingArea'] = int(soup.findAll('span', {'data-qa' : 'sqft'})[0].text.replace('sqft', '').replace(',', '').strip())
     propertyDict['resoFacts'] = {}
-    propertyDict['resoFacts']['bedrooms'] = soup.findAll('span', {'data-qa' : 'beds'})[0].text
-    propertyDict['resoFacts']['bathrooms'] = soup.findAll('span', {'data-qa' : 'baths'})[0].text
+    propertyDict['resoFacts']['bedrooms'] = int(soup.findAll('span', {'data-qa' : 'beds'})[0].text)
+    propertyDict['resoFacts']['bathrooms'] = int(soup.findAll('span', {'data-qa' : 'baths'})[0].text)
 
     driver.quit()
 

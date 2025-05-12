@@ -12,7 +12,6 @@ REGEX_SPACE = compile(r"[\s ]+")
 
 def main(url):
     header = utils.getRequestHeader()
-    print(header)
     print('Fetching data from Zillow...')
     response = requests.get(url, headers=header)
     utils.handleResponseErrors(response, header)
@@ -28,9 +27,9 @@ def addDataToPropertyDict(propertyDict: dict[str, any], url) -> None:
     :param propertyDict: dictionary containing property data
     :return: None
     """
-    location = propertyDict['city'] + ', ' + propertyDict['state']
+    location = propertyDict['city'] + ', ' + propertyDict['state'] + ' ' + propertyDict['zipcode']
     propertyDict['location'] = location
-    fullAddress = propertyDict['streetAddress'] + ', ' + location + ' ' + propertyDict['zipcode']
+    fullAddress = propertyDict['streetAddress'] + ', ' + location
     propertyDict['fullAddress'] = fullAddress
     propertyDict['url'] = url
     return

@@ -62,14 +62,6 @@ def handleResponseErrors(response, header = None):
 
 
 def getAndResolveUrl():
-    print('Welcome to Rickesh\'s Property Analyzer!')
-    print('This program will analyze a property from Zillow.com or OneHome.com.')
-    print('Please provide a valid URL for the property you want to analyze.')
-    print('The URL should be in the format: https://www.zillow.com/homedetails/ or https://portal.onehome.com/en-US/property/')
-    print('The program will then fetch the property data and analyze it.')
-    print('Note that the program may take a few minutes to fetch the data, depending on the property and your internet connection.')
-    
-    print()
     url = input('Provide a property URL: ')
     print()
 
