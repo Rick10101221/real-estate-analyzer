@@ -2,8 +2,11 @@
 import datetime
 import os
 import random
+import time
+from selenium import webdriver
 
 # file imports
+from bs4 import BeautifulSoup
 import onehome
 import zillow
 
@@ -74,5 +77,38 @@ def getAndResolveUrl():
             return onehome.main(url)
         else:
             print('Invalid URL. Please provide a valid property URL.')
+
+
+def getCrimeGrade(city, state):
+    city, state = city.lower().strip().replace(' ', '-'), state.lower().strip()
+    url = f'https://crimegrade.org/safest-places-in-{city}-{state}/'
+
+    soup = getSoupWithSelenium(url)
+    overallCrimeGrade = soup.find('p', class_='overallGradeLetter').text.strip()
+    return overallCrimeGrade, url
+
+
+def getSoupWithSelenium(url):
+    # Set up Selenium WebDriver
+    userAgents = getOSCompatibleUserAgents()
+    options = webdriver.ChromeOptions()
+    options.add_argument('--no-sandbox')
+    options.add_argument('--headless')
+    options.add_argument('--ignore-certificate-errors')
+    options.add_argument('--disable-dev-shm-usage')
+    options.add_argument('--disable-extensions')
+    options.add_argument('--disable-gpu')
+    options.add_argument('--enable-unsafe-swiftshader')
+    options.add_argument(f'--user-agent={random.choice(userAgents)}')
+    driver = webdriver.Chrome(options=options)
+    if driver == None:
+        raise ValueError("Selenium WebDriver is not initialized.")
+
+    driver.get(url)
+    print('Waiting for page to load...')
+    time.sleep(5)  # Wait for the page to load
     
-    return None
+    # Use BeautifulSoup to Parse
+    soup = BeautifulSoup(driver.page_source, 'html.parser')
+    driver.quit()
+    return soup

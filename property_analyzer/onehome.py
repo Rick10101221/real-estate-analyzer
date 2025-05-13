@@ -1,62 +1,40 @@
-import os
 import random
-import requests
 import time
 import utils
 
 from selenium import webdriver
-from selenium.webdriver.common.by import By
-from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.firefox.service import Service
-from selenium.webdriver.chrome.options import Options
 
 from bs4 import BeautifulSoup
 
 def main(url):
     print('Fetching data from OneHome...')
     
-    userAgents = utils.getOSCompatibleUserAgents()
-
-    # Set up Selenium WebDriver
-    options = webdriver.ChromeOptions()
-    options.add_argument('--no-sandbox')
-    options.add_argument('--headless')
-    options.add_argument('--ignore-certificate-errors')
-    options.add_argument('--disable-dev-shm-usage')
-    options.add_argument('--disable-extensions')
-    options.add_argument('--disable-gpu')
-    options.add_argument(f'--user-agent={random.choice(userAgents)}')
-    driver = webdriver.Chrome(options=options)
-
-    driver.get(url)
-    print('Waiting for page to load...')
-    time.sleep(5)  # Wait for the page to load
-    
-    # Use BeautifulSoup to Parse
-    soup = BeautifulSoup(driver.page_source, 'html.parser')
+    soup = utils.getSoupWithSelenium(url)
     
     propertyDict = {}
+    
+    # address information
+    propertyDict['fullAddress'] = soup.findAll('p', {'data-qa' : 'address-line1'})[0].text.strip()
+    stateZipSpaceIdx = propertyDict['fullAddress'].rfind(' ')
+    propertyDict['zipcode'] = propertyDict['fullAddress'][stateZipSpaceIdx + 1:]
+    propertyDict['state'] = propertyDict['fullAddress'][propertyDict['fullAddress'].rfind(' ', 0, stateZipSpaceIdx-1) + 1:stateZipSpaceIdx]
+    dtMlsAreaMajor = soup.find('dt', string='MLS Area Major')
+    mlsAreaMajor = dtMlsAreaMajor.find_next_sibling().text
+    propertyDict['city'] = mlsAreaMajor.split(' - ')[1].strip()
+    cityIdx = propertyDict['fullAddress'].find(propertyDict['city'])
+    propertyDict['streetAddress'] = propertyDict['fullAddress'][:cityIdx].strip()
+    propertyDict['location'] = propertyDict['fullAddress'][cityIdx:].strip()
+
+    # miscellaneous information
     propertyDict['url'] = url
     propertyDict['price'] = int(soup.find('p', class_='price').text.replace('$', '').replace(',','').strip())
-    propertyDict['fullAddress'] = soup.findAll('p', {'data-qa' : 'address-line1'})[0].text.strip()
-
-    addressSplit = propertyDict['fullAddress'].split(',')
-    if len(addressSplit) == 3:
-        propertyDict['streetAddress'] = propertyDict['fullAddress'].split(',')[0].strip()
-        propertyDict['location'] = propertyDict['fullAddress'].split(',')[1].strip()
-    elif len(addressSplit) == 2:
-        spaceIdx = addressSplit[0].rfind(' ')
-        propertyDict['streetAddress'] = addressSplit[0][:spaceIdx].strip()
-        propertyDict['location'] = addressSplit[0][spaceIdx+1:].strip() + ', ' + addressSplit[1].strip()
-
     propertyDict['homeType'] = soup.select_one('li[data-qa=\'PropertySubTypeColon-feature\'] dd.detail').text.strip()
     propertyDict['yearBuilt'] = int(soup.select_one('li[data-qa=\'YearBuiltColon-feature\'] dd.detail').text)
     propertyDict['livingArea'] = int(soup.findAll('span', {'data-qa' : 'sqft'})[0].text.replace('sqft', '').replace(',', '').strip())
     propertyDict['resoFacts'] = {}
     propertyDict['resoFacts']['bedrooms'] = int(soup.findAll('span', {'data-qa' : 'beds'})[0].text)
     propertyDict['resoFacts']['bathrooms'] = int(soup.findAll('span', {'data-qa' : 'baths'})[0].text)
-
-    driver.quit()
+    propertyDict['crimeGrade'], propertyDict['crimeGradeUrl'] = utils.getCrimeGrade(propertyDict['city'], propertyDict['state'])
 
     return propertyDict
 

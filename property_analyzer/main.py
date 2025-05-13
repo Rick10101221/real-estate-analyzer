@@ -6,8 +6,8 @@ from gspread.utils import ValueRenderOption
 
 
 def main():
-    introMsg()
-    print()
+    #introMsg()
+    #print()
 
     propertyDict = utils.getAndResolveUrl()
     driveService, sheetService, configDict = config.main()

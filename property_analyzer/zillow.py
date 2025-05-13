@@ -32,6 +32,7 @@ def addDataToPropertyDict(propertyDict: dict[str, any], url) -> None:
     fullAddress = propertyDict['streetAddress'] + ', ' + location
     propertyDict['fullAddress'] = fullAddress
     propertyDict['url'] = url
+    propertyDict['crimeGrade'], propertyDict['crimeGradeUrl'] = utils.getCrimeGrade(propertyDict['city'], propertyDict['state'])
     return
 
 

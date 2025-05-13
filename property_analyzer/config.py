@@ -17,6 +17,7 @@ def main():
             'analyzerFolderId': credsDict['analyzerFolderId'],
             'analyzerSourceSheetId': credsDict['analyzerSourceSheetId'],
             'prospectivePropsSheetId': credsDict['prospectivePropsSheetId'],
+            'crimeByCitySheetId': credsDict['crimeByCitySheetId'],
             }
 
     # authorize and instantiate google cloud services

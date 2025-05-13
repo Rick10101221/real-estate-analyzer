@@ -1,3 +1,7 @@
+import datetime
+
+import config
+
 from gspread.utils import ValueRenderOption
 
 
@@ -23,6 +27,16 @@ def writeToAnalyzerSheet(driveService, sheetService, configDict, propertyDict):
     for key in ['streetAddress', 'location', 'homeType', 'livingArea', 'yearBuilt']:
         coreInfo.append([propertyDict.get(key, ''), '', ''])
     analyzerWorksheet.update(coreInfo, f'E10:G{10 + len(coreInfo) - 1}')
+    crimeGradeLink = f'=HYPERLINK("{propertyDict["crimeGradeUrl"]}","{propertyDict["crimeGrade"]}")'
+    newAnalyzerSheet.values_update(
+        f'Analyzer!E24:G24',
+        params={
+            'valueInputOption': 'USER_ENTERED'
+        },
+        body={
+            'values': [[crimeGradeLink]]
+        }
+    )
 
     #write rates and percentages
     analyzerWorksheet.update([[propertyDict['price'], '']], 'F30:G30')
@@ -43,6 +57,31 @@ def getDataFromAnalyzerSheet(sheetService, newAnalyzerSheetId):
     analyzerSheetData['monthlyAmt'] = round(analyzerWorksheet.get("T94:U94", value_render_option=ValueRenderOption.unformatted)[0][0], 2)
 
     return analyzerSheetData
+
+
+def getCrimeDataByCitySheetData(sheetService, configDict, city):
+    #get crime data worksheet reference
+    crimeDataSheet = sheetService.open_by_key(configDict["crimeByCitySheetId"])
+    crimeDataWorksheet = crimeDataSheet.get_worksheet(1)
+
+    cities = crimeDataWorksheet.col_values(1)
+    try:
+        queryCityRow = cities.index(city) + 1
+    except:
+        return None
+    
+    cityRowData = crimeDataWorksheet.row_values(queryCityRow)
+    crimeByCityData = {}
+    crimeByCityData['city'] = cityRowData[0]
+    crimeByCityData['county'] = cityRowData[1]
+    crimeByCityData['population'] = cityRowData[2]
+    crimeByCityData['populationDensity'] = cityRowData[3]
+    crimeByCityData['violentCrime'] = cityRowData[4]
+    crimeByCityData['violentCrimeRate'] = cityRowData[5]
+    crimeByCityData['propertyCrime'] = cityRowData[6]
+    crimeByCityData['propertyCrimeRate'] = cityRowData[7]
+
+    return crimeByCityData
 
 
 def writeDataToProspectivePropsSheet(sheetService, configDict, propertyDict, analyzerSheetData, newAnalyzerSheetId):
@@ -80,6 +119,24 @@ def writeDataToProspectivePropsSheet(sheetService, configDict, propertyDict, ana
     dimensionStr = f'{propertyDict['resoFacts']['bedrooms']}x{propertyDict['resoFacts']['bathrooms']}'
     prospectivePropsWorksheet.update([[propertyDict['price'], analyzerSheetData['monthlyAmt'], propertyDict['livingArea'], dimensionStr]], f'D{newRowIdx}:G{newRowIdx}')
 
+    # write crime data
+    crimeByCityData = getCrimeDataByCitySheetData(sheetService, configDict, propertyDict['city'])
+    crimeGradeLink = f'=HYPERLINK("{propertyDict["crimeGradeUrl"]}","{propertyDict["crimeGrade"]}")'
+    prospectivePropsSheet.values_update(
+        f'Sheet1!H{newRowIdx}',
+        params={
+            'valueInputOption': 'USER_ENTERED'
+        },
+        body={
+            'values': [[crimeGradeLink]]
+        }
+    )
+    if crimeByCityData:
+        prospectivePropsWorksheet.update_acell(f'I{newRowIdx}', crimeByCityData['propertyCrimeRate'])
+
+    prospectivePropsWorksheet.update([['Available', f'{datetime.datetime.now().strftime("%m/%d/%y")}']], f'J{newRowIdx}:K{newRowIdx}', 'Available')
+
+    
 
 if __name__ == "__main__":
     main()
