@@ -12,7 +12,7 @@ REGEX_SPACE = compile(r"[\s ]+")
 
 
 def main(url):
-    header = utils.getRequestHeader()
+    header = utils.getRequestHeader(True)
     print(header)
     print('Fetching data from Zillow...')
     response = requests.get(url, headers=header)
@@ -37,12 +37,21 @@ def addDataToPropertyDict(propertyDict: dict[str, any], url) -> None:
     propertyDict['crimeGrade'], propertyDict['crimeGradeUrl'] = utils.getCrimeGrade(propertyDict['city'], propertyDict['state'])
     if propertyDict['monthlyHoaFee'] == None:
         propertyDict['monthlyHoaFee'] = 0
-    atAGlanceFacts = propertyDict['atAGlanceFacts']
-    atAGlanceFactsDict = {factDict['factLabel']: factDict['factValue'] for factDict in atAGlanceFacts}
-    propertyDict['daysOnMarket'] = atAGlanceFactsDict.get('Days on Zillow', '')
-    if propertyDict['daysOnMarket'] != '':
-        propertyDict['daysOnMarket'] = int(propertyDict['daysOnMarket'])
-        propertyDict['listingDate'] = (datetime.date.today() - datetime.timedelta(days=propertyDict['daysOnMarket'])).strftime('%m/%d/%y')
+    try:
+        atAGlanceFacts = propertyDict['resoFacts']['atAGlanceFacts']
+        print(atAGlanceFacts)
+        atAGlanceFactsDict = {factDict['factLabel']: factDict['factValue'] for factDict in atAGlanceFacts}
+        print(atAGlanceFactsDict)
+        propertyDict['daysOnMarket'] = atAGlanceFactsDict.get('Days on Zillow', '').split(' ')[0]
+        if propertyDict['daysOnMarket'] != '':
+            propertyDict['daysOnMarket'] = int(propertyDict['daysOnMarket'])
+            propertyDict['listingDate'] = (datetime.date.today() - datetime.timedelta(days=propertyDict['daysOnMarket'])).strftime('%m/%d/%y')
+    except:
+        propertyDict['daysOnMarket'] = -1
+        propertyDict['listingDate'] = datetime.datetime(1999, 1, 1).strftime('%m/%d/%y')
+
+    print(propertyDict)
+
     return
 
 
@@ -50,7 +59,9 @@ def getPropertyDataFromBody(body: dict[str, any]) -> dict[str, any]:
     cache = body['gdpClientCache']
     cache = cache[cache.index('{\"property\"'):].replace('\\\\"', '').replace('\\\'', '').rstrip('\'')[:-1]
     propertyDict = loads(cache)
-    return propertyDict['property']
+    propertyDict = propertyDict['property']
+    #print(propertyDict)
+    return propertyDict
 
 
 def parseBody(body: bytes) -> dict[str, any]:

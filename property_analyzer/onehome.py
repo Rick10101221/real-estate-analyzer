@@ -38,8 +38,12 @@ def main(url):
     propertyDict['yearBuilt'] = int(soup.select_one('li[data-qa=\'YearBuiltColon-feature\'] dd.detail').text)
     propertyDict['livingArea'] = int(soup.findAll('span', {'data-qa' : 'sqft'})[0].text.replace('sqft', '').replace(',', '').strip())
     propertyDict['resoFacts'] = {}
-    propertyDict['resoFacts']['bedrooms'] = int(soup.findAll('span', {'data-qa' : 'beds'})[0].text)
-    propertyDict['resoFacts']['bathrooms'] = int(soup.findAll('span', {'data-qa' : 'baths'})[0].text)
+    try:
+        propertyDict['resoFacts']['bedrooms'] = int(soup.findAll('span', {'data-qa' : 'beds'})[0].text)
+        propertyDict['resoFacts']['bathrooms'] = int(soup.findAll('span', {'data-qa' : 'baths'})[0].text)
+    except:
+        propertyDict['resoFacts']['bedrooms'] = 0
+        propertyDict['resoFacts']['bathrooms'] = 0
     propertyDict['crimeGrade'], propertyDict['crimeGradeUrl'] = utils.getCrimeGrade(propertyDict['city'], propertyDict['state'])
 
     return propertyDict

@@ -12,7 +12,7 @@ import zillow
 
 OS = "Windows"
 
-def getOSCompatibleUserAgents() -> list[str]:
+def getOSCompatibleUserAgents(excludeWebKit = False) -> list[str]:
     """
     Get a list of user agents compatible with the current OS
     :return: list of user agents
@@ -20,14 +20,15 @@ def getOSCompatibleUserAgents() -> list[str]:
     compatibleAgents = []
     with open('user_agents.txt') as f:
         for line in f:
-            if OS in line:
-                compatibleAgents.append(line.strip()) 
+            if OS not in line: continue
+            if excludeWebKit and 'AppleWebKit' in line: continue
+            compatibleAgents.append(line.strip()) 
 
     return compatibleAgents
 
 
-def getRequestHeader() -> dict[str, str]:
-    compatibleAgents = getOSCompatibleUserAgents()
+def getRequestHeader(excludeWebKit = False) -> dict[str, str]:
+    compatibleAgents = getOSCompatibleUserAgents(excludeWebKit)
 
     if not compatibleAgents:
         raise ValueError("No compatible user agents found for the current OS.")
@@ -46,7 +47,7 @@ def getRequestHeader() -> dict[str, str]:
         "Sec-Fetch-Site": "none",
         "Sec-Fetch-User": "?1",
         "Upgrade-Insecure-Requests": "1",
-        'User-Agent': random.choice(compatibleAgents),
+        'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; FunWebProducts; rv:11.0) like Gecko',#random.choice(compatibleAgents),
         'TE': 'Trailers'
     }
 
