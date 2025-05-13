@@ -1,10 +1,6 @@
-import random
-import time
 import utils
 
-from selenium import webdriver
-
-from bs4 import BeautifulSoup
+import datetime
 
 def main(url):
     print('Fetching data from OneHome...')
@@ -34,6 +30,9 @@ def main(url):
         propertyDict['monthlyHoaFee'] = 0
 
     # miscellaneous information
+    daysOnMarketSiblingSpan = soup.find('span', string='Days on OneHome')
+    propertyDict['daysOnMarket'] = int(list(daysOnMarketSiblingSpan.find_next_sibling().children)[1].text.strip())
+    propertyDict['listingDate'] = (datetime.date.today() - datetime.timedelta(days=propertyDict['daysOnMarket'])).strftime('%m/%d/%y')
     propertyDict['url'] = url
     propertyDict['homeType'] = soup.select_one('li[data-qa=\'PropertySubTypeColon-feature\'] dd.detail').text.strip()
     propertyDict['yearBuilt'] = int(soup.select_one('li[data-qa=\'YearBuiltColon-feature\'] dd.detail').text)

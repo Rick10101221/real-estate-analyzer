@@ -1,3 +1,4 @@
+import datetime
 import requests
 import utils
 
@@ -36,6 +37,12 @@ def addDataToPropertyDict(propertyDict: dict[str, any], url) -> None:
     propertyDict['crimeGrade'], propertyDict['crimeGradeUrl'] = utils.getCrimeGrade(propertyDict['city'], propertyDict['state'])
     if propertyDict['monthlyHoaFee'] == None:
         propertyDict['monthlyHoaFee'] = 0
+    atAGlanceFacts = propertyDict['atAGlanceFacts']
+    atAGlanceFactsDict = {factDict['factLabel']: factDict['factValue'] for factDict in atAGlanceFacts}
+    propertyDict['daysOnMarket'] = atAGlanceFactsDict.get('Days on Zillow', '')
+    if propertyDict['daysOnMarket'] != '':
+        propertyDict['daysOnMarket'] = int(propertyDict['daysOnMarket'])
+        propertyDict['listingDate'] = (datetime.date.today() - datetime.timedelta(days=propertyDict['daysOnMarket'])).strftime('%m/%d/%y')
     return
 
 
