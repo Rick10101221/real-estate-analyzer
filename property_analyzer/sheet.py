@@ -1,8 +1,9 @@
 import datetime
 
-import config
-
 from gspread.utils import ValueRenderOption
+
+
+ANALYZER_PROP_INFO_START_ROW = 10
 
 
 def main():
@@ -24,9 +25,19 @@ def writeToAnalyzerSheet(driveService, sheetService, configDict, propertyDict):
 
     #write core property information
     coreInfo = []
-    for key in ['streetAddress', 'location', 'homeType', 'livingArea', 'yearBuilt']:
+    listingLink = f'=HYPERLINK("{propertyDict["url"]}","{propertyDict["streetAddress"]}")'
+    newAnalyzerSheet.values_update(
+        f'Analyzer!E{ANALYZER_PROP_INFO_START_ROW}:G{ANALYZER_PROP_INFO_START_ROW}',
+        params={
+            'valueInputOption': 'USER_ENTERED'
+        },
+        body={
+            'values': [[listingLink]]
+        }
+    )
+    for key in ['location', 'homeType', 'livingArea', 'yearBuilt']:
         coreInfo.append([propertyDict.get(key, ''), '', ''])
-    analyzerWorksheet.update(coreInfo, f'E10:G{10 + len(coreInfo) - 1}')
+    analyzerWorksheet.update(coreInfo, f'E{ANALYZER_PROP_INFO_START_ROW+1}:G{ANALYZER_PROP_INFO_START_ROW + len(coreInfo)}')
     crimeGradeLink = f'=HYPERLINK("{propertyDict["crimeGradeUrl"]}","{propertyDict["crimeGrade"]}")'
     newAnalyzerSheet.values_update(
         f'Analyzer!E24:G24',
