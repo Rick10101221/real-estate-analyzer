@@ -25,9 +25,16 @@ def main(url):
     propertyDict['streetAddress'] = propertyDict['fullAddress'][:cityIdx].strip()
     propertyDict['location'] = propertyDict['fullAddress'][cityIdx:].strip()
 
+    # price information
+    propertyDict['price'] = int(soup.find('p', class_='price').text.replace('$', '').replace(',','').strip())
+    try:
+        hoaMonthlyStr = soup.select_one('li[data-qa=\'AssociationFeeColon-feature\'] dd.detail').text.strip()
+        propertyDict['monthlyHoaFee'] = int(hoaMonthlyStr.split(' ')[0].replace('$', '').replace(',', '').strip())
+    except:
+        propertyDict['monthlyHoaFee'] = 0
+
     # miscellaneous information
     propertyDict['url'] = url
-    propertyDict['price'] = int(soup.find('p', class_='price').text.replace('$', '').replace(',','').strip())
     propertyDict['homeType'] = soup.select_one('li[data-qa=\'PropertySubTypeColon-feature\'] dd.detail').text.strip()
     propertyDict['yearBuilt'] = int(soup.select_one('li[data-qa=\'YearBuiltColon-feature\'] dd.detail').text)
     propertyDict['livingArea'] = int(soup.findAll('span', {'data-qa' : 'sqft'})[0].text.replace('sqft', '').replace(',', '').strip())

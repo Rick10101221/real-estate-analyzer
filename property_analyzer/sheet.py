@@ -51,6 +51,7 @@ def writeToAnalyzerSheet(driveService, sheetService, configDict, propertyDict):
 
     #write rates and percentages
     analyzerWorksheet.update([[propertyDict['price'], '']], 'F30:G30')
+    analyzerWorksheet.update([[propertyDict['monthlyHoaFee']*12, '']], 'F41:G41')   # annual hoa fee
 
     #write unit breakdown
     analyzerWorksheet.update([[1, propertyDict['resoFacts']['bedrooms'], propertyDict['resoFacts']['bathrooms']]], 'S10:U10')
