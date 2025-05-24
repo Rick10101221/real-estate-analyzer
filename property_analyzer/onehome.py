@@ -31,8 +31,12 @@ def main(url):
 
     # miscellaneous information
     daysOnMarketSiblingSpan = soup.find('span', string='Days on OneHome')
-    propertyDict['daysOnMarket'] = int(list(daysOnMarketSiblingSpan.find_next_sibling().children)[1].text.strip())
-    propertyDict['listingDate'] = (datetime.date.today() - datetime.timedelta(days=propertyDict['daysOnMarket'])).strftime('%m/%d/%y')
+    try:
+        propertyDict['daysOnMarket'] = int(list(daysOnMarketSiblingSpan.find_next_sibling().children)[1].text.strip())
+        propertyDict['listingDate'] = (datetime.date.today() - datetime.timedelta(days=propertyDict['daysOnMarket'])).strftime('%m/%d/%y')
+    except:
+        propertyDict['daysOnMarket'] = -1
+        propertyDict['listingDate'] = datetime.datetime(1999, 1, 1).strftime('%m/%d/%y')
     propertyDict['url'] = url
     propertyDict['homeType'] = soup.select_one('li[data-qa=\'PropertySubTypeColon-feature\'] dd.detail').text.strip()
     propertyDict['yearBuilt'] = int(soup.select_one('li[data-qa=\'YearBuiltColon-feature\'] dd.detail').text)

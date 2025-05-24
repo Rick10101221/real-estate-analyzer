@@ -66,16 +66,17 @@ def handleResponseErrors(response, header = None):
 
 
 def getAndResolveUrl():
-    url = input('Provide a property URL: ')
-    print()
-
     while True:
+        url = input('Provide a property URL: ')
+        print()
         if url.startswith('https://www.zillow.com/homedetails/'):
             # Call the Zillow function here
             return zillow.main(url)  
         elif url.startswith('https://portal.onehome.com/en-US/property/'):
             # Call the OneHome function here
             return onehome.main(url)
+        elif url == 'quit':
+            return None
         else:
             print('Invalid URL. Please provide a valid property URL.')
 

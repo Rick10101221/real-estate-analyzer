@@ -129,15 +129,17 @@ def writeDataToProspectivePropsSheet(sheetService, configDict, propertyDict, ana
         }
     )
 
+    prospectivePropsWorksheet.update_acell(f'D{newRowIdx}', propertyDict['listingDate'])
+
     # write remaining info (total price, monthly amount, living area, dimensions, etc.)
     dimensionStr = f'{propertyDict['resoFacts']['bedrooms']}x{propertyDict['resoFacts']['bathrooms']}'
-    prospectivePropsWorksheet.update([[analyzerSheetData['daysOnMarket'],propertyDict['price'], analyzerSheetData['monthlyAmt'], propertyDict['livingArea'], dimensionStr]], f'D{newRowIdx}:H{newRowIdx}')
+    prospectivePropsWorksheet.update([[propertyDict['price'], analyzerSheetData['monthlyAmt'], propertyDict['livingArea'], dimensionStr]], f'F{newRowIdx}:I{newRowIdx}')
 
     # write crime data
     crimeByCityData = getCrimeDataByCitySheetData(sheetService, configDict, propertyDict['city'])
     crimeGradeLink = f'=HYPERLINK("{propertyDict["crimeGradeUrl"]}","{propertyDict["crimeGrade"]}")'
     prospectivePropsSheet.values_update(
-        f'Sheet1!I{newRowIdx}',
+        f'Sheet1!J{newRowIdx}',
         params={
             'valueInputOption': 'USER_ENTERED'
         },
@@ -146,9 +148,9 @@ def writeDataToProspectivePropsSheet(sheetService, configDict, propertyDict, ana
         }
     )
     if crimeByCityData:
-        prospectivePropsWorksheet.update_acell(f'J{newRowIdx}', crimeByCityData['propertyCrimeRate'])
+        prospectivePropsWorksheet.update_acell(f'K{newRowIdx}', crimeByCityData['propertyCrimeRate'])
 
-    prospectivePropsWorksheet.update([['Available', f'{datetime.datetime.now().strftime("%m/%d/%y")}']], f'K{newRowIdx}:L{newRowIdx}', 'Available')
+    prospectivePropsWorksheet.update([['Available', f'{datetime.datetime.now().strftime("%m/%d/%y")}']], f'L{newRowIdx}:M{newRowIdx}', 'Available')
 
     
 

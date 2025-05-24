@@ -39,9 +39,7 @@ def addDataToPropertyDict(propertyDict: dict[str, any], url) -> None:
         propertyDict['monthlyHoaFee'] = 0
     try:
         atAGlanceFacts = propertyDict['resoFacts']['atAGlanceFacts']
-        print(atAGlanceFacts)
         atAGlanceFactsDict = {factDict['factLabel']: factDict['factValue'] for factDict in atAGlanceFacts}
-        print(atAGlanceFactsDict)
         propertyDict['daysOnMarket'] = atAGlanceFactsDict.get('Days on Zillow', '').split(' ')[0]
         if propertyDict['daysOnMarket'] != '':
             propertyDict['daysOnMarket'] = int(propertyDict['daysOnMarket'])
@@ -49,8 +47,6 @@ def addDataToPropertyDict(propertyDict: dict[str, any], url) -> None:
     except:
         propertyDict['daysOnMarket'] = -1
         propertyDict['listingDate'] = datetime.datetime(1999, 1, 1).strftime('%m/%d/%y')
-
-    print(propertyDict)
 
     return
 

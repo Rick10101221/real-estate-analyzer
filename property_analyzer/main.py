@@ -10,6 +10,8 @@ def main():
     #print()
 
     propertyDict = utils.getAndResolveUrl()
+    if propertyDict == None:
+        return
     driveService, sheetService, configDict = config.main()
 
     print('Copying analyzer sheet and writing data from property page...')
