@@ -1,5 +1,9 @@
 REA Enhancement Ideas
 
-- Better row resolution
+- AI integration
+    - Use Browser-Use or a similar tool to do the scraping for you (this would remove the need to add dedicated support for Redfin/Realtor/etc. and any hard-coded DOM lookups you're doing in zillow/onehome.py)
+    - Maybe use this to find comparable property values
+- Better row resolution in analyzer and prospective property sheets
 - ARV
 - Redfin Support
+- Look into getting property data via an API. RapidAPI has several Zillow APIs that can pull property data without Selenium - how do they do this?
